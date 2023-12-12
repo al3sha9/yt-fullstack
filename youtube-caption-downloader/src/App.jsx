@@ -7,7 +7,7 @@ function App() {
 
   const handleDownloadClick = async () => {
     try {
-      const response = await axios.post('http://localhost:3001/download-caption', { videoId });
+      const response = await axios.post('https://yt-fullstack.vercel.app/download-caption', { videoId });
       setCaptionLink(response.data.captionLink);
     } catch (error) {
       console.error('Error downloading caption:', error.message);
