@@ -22,45 +22,48 @@ function App() {
         `http://localhost:3001/video-details?videoId=${videoId}`
       );
       const { title, thumbnail } = responseDetails.data;
-
-      // Display the title and thumbnail
-      // console.log("Video Title:", title);
-      // console.log("Thumbnail URL:", thumbnail);
-
+  
+      
+  
       // Update state to reflect the video details
       setVideoDetails({ title, thumbnail });
-
+  
       // Make the download request
       const response = await axios.post(
         `http://localhost:3001/download-caption?lang=${selectedLanguage}`,
         { videoId },
-        { responseType: "blob" }
+        { responseType: "arraybuffer" } // Use responseType arraybuffer
       );
-
-      // Create a Blob object from the response data
-      const blob = new Blob([response.data], { type: "text/plain" });
-
+  
+      // Decode the text content using he library
+      const decodedText = he.decode(new TextDecoder().decode(new Uint8Array(response.data)));
+  
+      // Create a Blob object from the decoded text content
+      const blob = new Blob([decodedText], { type: "text/plain" });
+  
       // Create a link element
       const link = document.createElement("a");
-
+  
       // Set the href attribute with the object URL of the Blob
       link.href = window.URL.createObjectURL(blob);
-
+  
       // Set the download attribute with the video title as the desired file name
       link.download = `${title}.txt`;
-
+  
       // Append the link to the body
       document.body.appendChild(link);
-
+  
       // Trigger a click on the link to start the download
       link.click();
-
+  
       // Remove the link from the body
       document.body.removeChild(link);
     } catch (error) {
       console.error("Error downloading caption:", error.message);
     }
   };
+  
+  
 
   const handleResetClick = () => {
     setVideoId("");
@@ -93,9 +96,9 @@ function App() {
         </select>
       </div>
       {videoDetails.title && (
-        <div>
-          <h2>Video Title: {videoDetails.title}</h2>
-          <img src={videoDetails.thumbnail} alt="Video Thumbnail" />
+        <div className="bg-indigo-600 flex flex-col justify-center items-center text-center p-4">
+          <h2 className="font-bold text-white font-sans text-xl py-4">Video Title: {videoDetails.title}</h2>
+          <img src={videoDetails.thumbnail} className="w-[600px]" alt="Video Thumbnail" />
         </div>
       )}
       <button
