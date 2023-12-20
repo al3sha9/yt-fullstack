@@ -96,9 +96,9 @@ function App() {
         </select>
       </div>
       {videoDetails.title && (
-        <div className="bg-indigo-600 flex flex-col justify-center items-center text-center p-4">
+        <div className="bg-indigo-600 hover:z-30   hover:scale-[1.02]  duration-100 transform  flex flex-col justify-center items-center text-center p-4">
           <h2 className="font-bold text-white font-sans text-xl py-4">Video Title: {videoDetails.title}</h2>
-          <img src={videoDetails.thumbnail} className="w-[600px]" alt="Video Thumbnail" />
+          <img src={videoDetails.thumbnail} className=" mx-2 md:mx-0  my-5 px-6  hover:scale-[1.02]  duration-100 transform hover:z-30 hover:shadow-2xl w-[600px] shadow-xl relative" alt="Video Thumbnail" />
         </div>
       )}
       <button
