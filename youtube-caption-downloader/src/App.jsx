@@ -33,7 +33,7 @@ function App() {
   const handleDownloadClick = async (videoId) => {
     try {
       const response = await axios.post(
-        `http://localhost:3001/download-caption?lang=${selectedLanguage}`,
+        `https://yt-fullstack.vercel.app/download-caption?lang=${selectedLanguage}`,
         { videoId },
         { responseType: "arraybuffer" }
       );
