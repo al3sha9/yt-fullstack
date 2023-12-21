@@ -20,7 +20,7 @@ app.post('/search-videos', async (req, res) => {
 
   try {
     const searchResults = await ytSearch(query);
-    const videos = searchResults.videos.slice(0, 5).map(video => ({
+    const videos = searchResults.videos.slice(0, 12).map(video => ({
       videoId: video.videoId,
       title: video.title,
       thumbnail: video.thumbnail,
