@@ -24,14 +24,19 @@ app.post('/search-videos', async (req, res) => {
       videoId: video.videoId,
       title: video.title,
       thumbnail: video.thumbnail,
+      views: video.views, // Include views
+      channel: {
+        name: video.author.name, // Assuming the author's name is the channel name
+      },
+      description: video.description || 'No description available', // Include description
     }));
-
     res.json({ videos });
   } catch (error) {
     console.error('Error searching videos:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 app.post('/download-caption', async (req, res) => {
   const { videoId } = req.body;

@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import he from "he";
+import Modal from "react-modal"; // Import react-modal
+import VideoModal from "./modell";
+import "react-tooltip/dist/react-tooltip.css";
+import { Tooltip } from "react-tooltip";
 
 function App() {
   const [query, setQuery] = useState("");
@@ -10,6 +14,17 @@ function App() {
     title: "",
     thumbnail: "",
   });
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState(null);
+
+  const openModal = (video) => {
+    setSelectedVideo(video);
+    setModalIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalIsOpen(false);
+  };
 
   const handleLanguageChange = (e) => {
     setSelectedLanguage(e.target.value);
@@ -48,7 +63,10 @@ function App() {
       const response = await axios.post("http://localhost:3001/search-videos", {
         query,
       });
-      setVideos(response.data.videos);
+      const sortedVideos = response.data.videos.sort(
+        (a, b) => b.views - a.views
+      ); // Sort by views in descending order
+      setVideos(sortedVideos);
     } catch (error) {
       console.error("Error searching videos:", error.message);
     }
@@ -56,9 +74,18 @@ function App() {
 
   return (
     <div className="min-h-[100vh] space-y-4 py-6 flex flex-col justify-center items-center">
-      <h1 className="font-extrabold font-sans text-6xl">
-        YouTube Caption Downloader
-      </h1>
+      <div className="text-center py-6">
+        <h1 className=" text-3xl font-bold leading-tight tracking-tight text-gray-900 sm:text-5xl text-center">
+          Youtube Video{" "}
+          <span className="inline-block  bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">
+            Transcript Downloader
+          </span>
+        </h1>
+        <h2 className=" text-base md:w-[60%] w-[80%] mx-auto md:text-xl font-semibold leading-6 text-">
+          Youtubechanneltranscripts is a FREE website that allows users to
+          download YouTube video transcripts or subtitles in txt format
+        </h2>
+      </div>
       <div className="flex flex-wrap md:flex-nowrap mx-2 md:mx-0">
         <input
           type="text"
@@ -79,26 +106,44 @@ function App() {
           {videos.map((video) => (
             <div
               key={video.videoId}
-              className="bg-indigo-300 w-full md:w-1/3 border-white border-4 hover:z-30 hover:shadow-xl   hover:scale-[1.02]  duration-100 transform  flex flex-col justify-center items-center text-center p-4"
+              className="w-full  min-h-[300px] md:w-1/3 border-white border-4  hover:shadow-xl hover:scale-[1.02] duration-100 transform flex flex-col justify-center items-center text-center p-4"
             >
-              <h2 className="font-bold text-white font-sans text-xl py-4">
-                {video.title}
-              </h2>
-              <img
-                src={video.thumbnail}
-                className="mx-2 md:mx-0  my-5 px-6  hover:scale-[1.02]  duration-100 transform hover:z-30 hover:shadow-2xl  shadow-xl relative"
-                alt="Video Thumbnail"
-              />
-              <button
-                className="rounded-lg bg-indigo-600 px-5 py-3 text-sm font-medium text-white"
-                onClick={() => handleDownloadClick(video.videoId)}
+              <div
+                className="absolute top-0 left-0 w-full h-full bg-cover bg-center bg-no-repeat"
+                style={{
+                  backgroundImage: `url(${video.thumbnail})`,
+                }}
               >
-                Download TXT
-              </button>
+                <div className="absolute inset-0 bg-[#182f36] opacity-50"></div>
+              </div>
+              <div className="flex z-30 justify-center items-center h-inherit space-y-4 flex-col">
+                <h2
+                  onClick={() => openModal(video)}
+                  data-tooltip-id="my-tooltip"
+                  data-tooltip-content="Click to play the video and get the details!"
+                  className="font-bold cursor-pointer hover:underline text-white font-sans text-xl py-4"
+                >
+                  {video.title}
+                </h2>
+                <button
+                  className="rounded-lg bg-indigo-600 px-5 py-3 text-sm font-medium text-white"
+                  onClick={() => handleDownloadClick(video.videoId)}
+                >
+                  Download TXT
+                </button>
+              </div>
             </div>
           ))}
         </div>
+        <Tooltip id="my-tooltip" />
       </div>
+
+      {/* modal */}
+      <VideoModal
+        isOpen={modalIsOpen}
+        onClose={closeModal}
+        video={selectedVideo}
+      />
     </div>
   );
 }
