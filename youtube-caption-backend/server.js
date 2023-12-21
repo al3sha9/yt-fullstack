@@ -8,16 +8,12 @@ const xml2js = require('xml2js');
 const ytSearch = require('yt-search');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
-const lang = process.env.DEFAULT_LANGUAGE || 'en';
+const PORT = 3001;
+let lang = 'en';
 
+const cors = require('cors');
+app.use(cors());
 app.use(express.json());
-
-// Function to handle errors and return a consistent JSON response
-const handleErrors = (res, error, status = 500) => {
-  console.error('Error:', error);
-  res.status(status).json({ error: 'Internal Server Error' });
-};
 
 app.post('/search-videos', async (req, res) => {
   const { query } = req.body;
@@ -28,17 +24,19 @@ app.post('/search-videos', async (req, res) => {
       videoId: video.videoId,
       title: video.title,
       thumbnail: video.thumbnail,
-      views: video.views || 'N/A', // Include views with a fallback
+      views: video.views, // Include views
       channel: {
-        name: video.author.name || 'N/A', // Include channel name with a fallback
+        name: video.author.name, // Assuming the author's name is the channel name
       },
-      description: video.description || 'No description available',
+      description: video.description || 'No description available', // Include description
     }));
     res.json({ videos });
   } catch (error) {
-    handleErrors(res, error);
+    console.error('Error searching videos:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 app.post('/download-caption', async (req, res) => {
   const { videoId } = req.body;
@@ -66,7 +64,8 @@ app.post('/download-caption', async (req, res) => {
             const parser = new xml2js.Parser();
             parser.parseString(xmlData, async (err, result) => {
               if (err) {
-                handleErrors(res, err);
+                console.error('Error parsing XML:', err);
+                res.status(500).json({ error: 'Internal Server Error' });
               } else {
                 const textContent = result.transcript.text.map(textElement => textElement._);
                 const processedText = textContent.join(' ');
@@ -76,11 +75,13 @@ app.post('/download-caption', async (req, res) => {
 
                 fs.writeFile(outputPath, processedText, (writeErr) => {
                   if (writeErr) {
-                    handleErrors(res, writeErr);
+                    console.error('Error writing to file:', writeErr);
+                    res.status(500).json({ error: 'Internal Server Error' });
                   } else {
                     res.download(outputPath, outputFileName, (downloadErr) => {
                       if (downloadErr) {
-                        handleErrors(res, downloadErr);
+                        console.error('Error downloading file:', downloadErr);
+                        res.status(500).json({ error: 'Internal Server Error' });
                       } else {
                         fs.unlink(outputPath, (unlinkErr) => {
                           if (unlinkErr) {
@@ -102,7 +103,8 @@ app.post('/download-caption', async (req, res) => {
       res.status(404).json({ error: 'No captions found for this video' });
     }
   } catch (error) {
-    handleErrors(res, error);
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
@@ -117,7 +119,8 @@ app.get('/video-details', async (req, res) => {
 
     res.json({ title, thumbnail: thumbnailUrl });
   } catch (error) {
-    handleErrors(res, error);
+    console.error('Error fetching video details:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
