@@ -5,26 +5,45 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const xml2js = require('xml2js');
+const ytSearch = require('yt-search');
 
 const app = express();
 const PORT = 3001;
-let lang = 'en'; // Global language variable
+let lang = 'en';
 
 const cors = require('cors');
 app.use(cors());
 app.use(express.json());
 
+app.post('/search-videos', async (req, res) => {
+  const { query } = req.body;
+
+  try {
+    const searchResults = await ytSearch(query);
+    const videos = searchResults.videos.slice(0, 5).map(video => ({
+      videoId: video.videoId,
+      title: video.title,
+      thumbnail: video.thumbnail,
+    }));
+
+    res.json({ videos });
+  } catch (error) {
+    console.error('Error searching videos:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 app.post('/download-caption', async (req, res) => {
   const { videoId } = req.body;
   const format = 'xml';
-  const clientLang = req.query.lang; // Get language from client query parameter
+  const clientLang = req.query.lang;
 
   try {
     const info = await ytdl.getInfo(videoId);
     const tracks = info.player_response.captions.playerCaptionsTracklistRenderer.captionTracks;
 
     if (tracks && tracks.length) {
-      const track = tracks.find(t => t.languageCode === (clientLang || lang)); // Use clientLang if available, otherwise use the default lang
+      const track = tracks.find(t => t.languageCode === (clientLang || lang));
 
       if (track) {
         const captionLink = `${track.baseUrl}&fmt=${format !== 'xml' ? format : ''}`;
@@ -54,13 +73,11 @@ app.post('/download-caption', async (req, res) => {
                     console.error('Error writing to file:', writeErr);
                     res.status(500).json({ error: 'Internal Server Error' });
                   } else {
-                    // Set Content-Disposition header to trigger download
                     res.download(outputPath, outputFileName, (downloadErr) => {
                       if (downloadErr) {
                         console.error('Error downloading file:', downloadErr);
                         res.status(500).json({ error: 'Internal Server Error' });
                       } else {
-                        // Delete the temporary file after it has been sent
                         fs.unlink(outputPath, (unlinkErr) => {
                           if (unlinkErr) {
                             console.error('Error deleting file:', unlinkErr);
@@ -92,8 +109,6 @@ app.get('/video-details', async (req, res) => {
   try {
     const info = await ytdl.getInfo(videoId);
     const title = info.videoDetails.title;
-    
-    // Get the highest resolution thumbnail
     const thumbnails = info.videoDetails.thumbnail.thumbnails;
     const thumbnailUrl = thumbnails.reduce((prev, curr) => (prev.width > curr.width ? prev : curr)).url;
 
