@@ -6,6 +6,8 @@ const path = require('path');
 const https = require('https');
 const xml2js = require('xml2js');
 const ytSearch = require('yt-search');
+const cheerio = require('cheerio');
+
 
 const app = express();
 const PORT = 3001;
@@ -107,6 +109,35 @@ app.post('/download-caption', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+app.get('/channel-details', async (req, res) => {
+  const { channelName } = req.query;
+
+  try {
+    const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(
+      channelName
+    )}`;
+    const response = await axios.get(searchUrl);
+    const $ = cheerio.load(response.data);
+
+    const firstResult = $('ytd-channel-renderer').first();
+    const name = firstResult.find('#text').text().trim();
+    const totalVideos = firstResult.find('#metadata-line span:nth-child(1)').text().trim();
+    const profilePic = firstResult.find('#avatar img').attr('src');
+
+    const channelDetails = {
+      name,
+      totalVideos,
+      profilePic,
+    };
+
+    res.json(channelDetails);
+  } catch (error) {
+    console.error('Error fetching channel details:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 
 app.get('/video-details', async (req, res) => {
   const { videoId } = req.query;
