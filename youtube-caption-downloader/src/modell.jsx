@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
 import React, { useRef, useEffect } from 'react';
 import Modal from 'react-modal';
 import YouTube from 'react-youtube';

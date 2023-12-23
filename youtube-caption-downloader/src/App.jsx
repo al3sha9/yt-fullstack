@@ -5,6 +5,7 @@ import Modal from "react-modal"; // Import react-modal
 import VideoModal from "./modell";
 import "react-tooltip/dist/react-tooltip.css";
 import { Tooltip } from "react-tooltip";
+import { Nav } from "./components/navbar";
 
 function App() {
   const [query, setQuery] = useState("");
@@ -73,7 +74,9 @@ function App() {
   };
 
   return (
-    <div className="min-h-[100vh] space-y-4 py-6 flex flex-col justify-center items-center">
+    <>
+    <Nav />
+    <div className="md:min-h-[80vh] min-h-[100vh] space-y-4 py-6 flex flex-col justify-center items-center">
       <div className="text-center py-6">
         <h1 className=" text-3xl font-bold leading-tight tracking-tight text-gray-900 sm:text-5xl text-center">
           Youtube Video{" "}
@@ -145,6 +148,7 @@ function App() {
         video={selectedVideo}
       />
     </div>
+    </>
   );
 }
 
