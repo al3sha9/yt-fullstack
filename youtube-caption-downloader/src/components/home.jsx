@@ -33,7 +33,7 @@ function Home() {
   const handleDownloadClick = async (videoId) => {
     try {
       const response = await axios.post(
-        `https://yt-fullstack.vercel.app/:3001/download-caption?lang=${selectedLanguage}`,
+        `https://yt-fullstack.vercel.app/download-caption?lang=${selectedLanguage}`,
         { videoId },
         { responseType: "arraybuffer" }
       );
@@ -60,7 +60,7 @@ function Home() {
 
   const handleSearch = async () => {
     try {
-      const response = await axios.post("https://yt-fullstack.vercel.app/:3001/search-videos", {
+      const response = await axios.post("https://yt-fullstack.vercel.app/search-videos", {
         query,
       });
       const sortedVideos = response.data.videos.sort(
