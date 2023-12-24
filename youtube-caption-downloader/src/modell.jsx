@@ -49,7 +49,7 @@ const VideoModal = ({ isOpen, onClose, video }) => {
 
   return (
     <Modal isOpen={isOpen}  style={customStyles} ariaHideApp={false} onRequestClose={onClose}>
-      <div className="border-none modal-content">
+      <div className="border-none z-0 modal-content">
         <div className="video-container">
           <YouTube videoId={videoId} opts={opts} ref={playerRef} />
         </div>
